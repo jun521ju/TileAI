@@ -212,7 +212,7 @@ function coordToDirection(x, y, newX, newY){
 }
   
 function findNextMove(tileStates, x, y){
-    const maxMovesToSearch = 50;
+    const maxMovesToSearch = 40;
 
     // console.log('findNextMove --> tileStates', JSON.stringify(tileStates));
     if (tileStates[x][y] == 3) return [x, y]; //just jump
