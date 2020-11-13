@@ -193,6 +193,53 @@ function maxMovesTowardsAnywhere(x, y, seen, tileStates, targetMoveCt, curMoveCt
     return validMoveCt;
 }
 
+function minimax(tileStates, players, depth, curPlayer, alpha, beta){
+    let x = players[curPlayer].coord[0], y = players[curPlayer].coord[1];
+
+    if (depth == 0) return getScore3(tileStates, x, y);
+
+    if (curPlayer == 0){ // a maximizing player, which is our team's monster
+        let maxEval = Number.MIN_VALUE,  toRet = [maxEval, x, y];
+        let allValidMoves = getValidMoves(tileStates, x, y);
+
+        for (let move of allValidMoves){
+            let tileStatesCopy = deepCopy2D(tileStates); //make a copy  
+            tileStatesCopy[move[0]][move[1]]--; // make a move
+            let eval = minimax(tileStatesCopy, players, depth - 1, curPlayer ^ 1, alpha, beta);
+            if (eval[0] > maxEval){
+                maxEval = eval[0];
+                toRet = [maxEval, move[0], move[1]];
+            }
+
+            alpha = Math.max(alpha, eval[0]);
+            if (beta <= alpha){
+                break;
+            }
+        }
+        return toRet;
+    }else{// a minimizing player, which is opponent
+        let minEval = Number.MAX_VALUE, toRet = [minEval, x, y];
+        let allValidMoves = getValidMoves(tileStates, x, y);
+        
+        for (let move of allValidMoves){
+            let tileStatesCopy = deepCopy2D(tileStates); //make a copy  
+            tileStatesCopy[move[0]][move[1]]--; // make a move
+
+            let eval = minimax(tileStatesCopy, players, depth - 1, curPlayer ^ 1, alpha, beta);
+            if (eval[0] < minEval){
+                minEval = eval[0];
+                toRet = [minEval, move[0], move[1]];
+            }
+
+            beta = Math.min(beta, eval[0]);
+            if (beta <= alpha){
+                break;
+            }
+        }
+        return toRet;
+    }
+}
+
 function deepCopy2D(matrix){
     let copy = [];
     matrix.forEach(arr =>{
@@ -212,8 +259,6 @@ function coordToDirection(x, y, newX, newY){
 }
   
 function findNextMove(tileStates, x, y){
-    const maxMovesToSearch = 35;
-
     // console.log('findNextMove --> tileStates', JSON.stringify(tileStates));
     if (tileStates[x][y] == 3) return [x, y]; //just jump
 
@@ -259,9 +304,12 @@ function findNextMove(tileStates, x, y){
     return move;
 }
 
+let round = 0;
+let maxMovesToSearch = 50;
 function main(gameState, side) {
     let tStart = Date.now();
     console.log('-------entering main of dfsScript-----', side);
+    maxMovesToSearch = ++round < 3 ? 10 : 40;
     const myTeam = gameState.teamStates[side];
     var curTileStates = deepCopy2D(gameState.tileStates);
     let nextMoves = [];
