@@ -17,3 +17,7 @@ At the top level directiory run
 After initial installation you can run the app with
 
 ```npm start```
+
+Or you can play it here:
+
+```https://haunted-tiles.tylerdev.io/game```
